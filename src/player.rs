@@ -53,4 +53,5 @@ impl Player {
     pub fn set_volume(&mut self, volume: f32) {
         self.sink.set_volume(volume);
     }
+    
 }
