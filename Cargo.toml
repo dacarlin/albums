@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 id3 = "1.0"
 walkdir = "2.3"
+rodio = "0.17"
+iced = {version = "0.12", features = ["smol"]}
