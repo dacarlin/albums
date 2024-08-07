@@ -10,10 +10,10 @@ use library::{Library, Song};
 use player::Player;
 
 pub fn main() -> iced::Result {
-    Mp3Player::run(Settings::default())
+    MusicPlayer::run(Settings::default())
 }
 
-struct Mp3Player {
+struct MusicPlayer {
     library: Library,
     player: Player,
     current_song: Option<Song>,
@@ -30,24 +30,24 @@ enum Message {
     VolumeChanged(f32),
 }
 
-impl Application for Mp3Player {
+impl Application for MusicPlayer {
     type Executor = executor::Default;
     type Message = Message;
     type Theme = Theme;
     type Flags = ();
 
-    fn new(_flags: ()) -> (Mp3Player, Command<Message>) {
+    fn new(_flags: ()) -> (MusicPlayer, Command<Message>) {
         let music_dir = PathBuf::from("data");
         let library = Library::new(&music_dir).expect("Failed to create library");
         let player = Player::new().expect("Failed to create player");
 
         (
-            Mp3Player {
+            MusicPlayer {
                 library,
                 player,
                 current_song: None,
                 play_pause_text: "Play".to_string(),
-                volume: 0.5,
+                volume: 69.,
                 selected_song_index: None,
             },
             Command::none(),
@@ -97,7 +97,7 @@ impl Application for Mp3Player {
             }
             Message::VolumeChanged(new_volume) => {
                 self.volume = new_volume;
-                self.player.set_volume(new_volume);
+                self.player.set_volume(new_volume / 100.);
             }
         }
         Command::none()
@@ -115,15 +115,18 @@ impl Application for Mp3Player {
             "No song playing".to_string()
         };
 
-        let volume_slider = slider(0.0..=1.0, self.volume, Message::VolumeChanged);
-        let volume_text = text(format!("Volume: {:.0}%", self.volume * 100.0));
+        let volume_slider = slider(0.0..=100.0, self.volume, Message::VolumeChanged);
+        let volume_text = text(format!("Volume: {:.0}%", self.volume));
         let volume_control = row![volume_text, volume_slider].spacing(20);
 
         let song_list = self.library.get_sorted_songs().iter().enumerate().fold(
-            column![].spacing(5),
+            column![].spacing(9),
             |column, (i, song)| {
                 column.push(
-                    button(text(format!("{} - {}", song.artist, song.title)))
+                    button(row!(
+                        text(format!("{} - {}", song.artist, song.title)), 
+                        text(format!("{} - {}", song.artist, song.title))
+                    ))
                         .on_press(Message::SongSelected(i))
                         .style(if Some(i) == self.selected_song_index {
                             theme::Button::Primary
@@ -135,12 +138,13 @@ impl Application for Mp3Player {
         );
 
         let content = column![
-            Text::new("MP3 Player").size(40),
+            //Text::new("Player").size(40),
             text(current_song_text),
             controls,
             volume_control,
             scrollable(song_list)
                 .height(Length::FillPortion(3))
+                .width(Length::Fill)
                 .style(theme::Scrollable::Default) 
         ]
         .spacing(20);

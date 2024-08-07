@@ -30,6 +30,13 @@ impl Player {
         Ok(())
     }
 
+    pub fn add_song_to_sink(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let file = BufReader::new(File::open(path)?);
+        let source = Decoder::new(file)?;
+        self.sink.append(source);
+        Ok(())
+    }
+
     pub fn pause(&mut self) {
         self.sink.pause();
     }
